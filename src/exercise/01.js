@@ -73,15 +73,19 @@ function useUser() {
   return context
 }
 
-function updateUser(dispatch, user, updates) {
+async function updateUser(dispatch, user, updates) {
   dispatch({type: 'start update', updates})
-  userClient.updateUser(user, updates).then(
-    updatedUser => dispatch({type: 'finish update', updatedUser}),
-    error => dispatch({type: 'fail update', error}),
-  )
+  try {
+    const updatedUser = userClient.updateUser(user, updates)
+    dispatch({type: 'finish update', updatedUser})
+    return updatedUser
+  } catch (error) {
+    dispatch({type: 'fail update', error})
+    return Promise.reject(error)
+  }
 }
 
-// export {UserProvider, useUser}
+// export {UserProvider, updateUser, useUser}
 
 // src/screens/user-profile.js
 // import {UserProvider, useUser} from './context/user-context'
@@ -101,7 +105,7 @@ function UserSettings() {
 
   function handleSubmit(event) {
     event.preventDefault()
-    updateUser(userDispatch, {type: 'start update'}, formState)
+    updateUser(userDispatch, user, formState)
   }
 
   return (
