@@ -9,11 +9,11 @@ function Toggle({children}) {
   const toggle = () => setOn(!on)
 
   return React.Children.map(children, child => {
-    const props = 'string' === typeof child.type
-      ? {}
-      : {on, toggle}
+    if (typeof child.type === 'string') {
+      return child
+    }
 
-      return React.cloneElement(child, props)
+    return React.cloneElement(child, {on, toggle})
   })
 }
 
