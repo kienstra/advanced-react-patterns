@@ -41,7 +41,7 @@ function useToggle({
       dispatch(action)
     }
 
-    onChange && onChange(reducer({...state, on}, action), action)
+    onChange?.(reducer({...state, on}, action), action)
   }
 
   const toggle = () => dispatchWithOnChange({type: actionTypes.toggle})
