@@ -25,31 +25,23 @@ function toggleReducer(state, {type, initialState}) {
   }
 }
 
-function useControlledWarning({controlledOn, hasOnChange, onIsControlled, readOnly}) {
-  React.useEffect( () => {
-    if (onIsControlled && ! hasOnChange && !readOnly ) {
-      console.error(
-        'An on prop was passed to useToggle without an onChange prop. If you want it to be immutable, use initialOn. Otherwise, set either onChange or readOnly'
-      )
-    }
-
-  }, [controlledOn, hasOnChange, onIsControlled, readOnly])
-
-  const {current: wasOnControlled } = React.useRef(onIsControlled)
+function useControlledWarning(controlPropValue, controlPropName, componentName, {controlledOn, hasOnChange, readOnly}) {
+  const isControlled = controlPropValue != null
+  const {current: wasControlled } = React.useRef(isControlled)
 
   React.useEffect( () => {
-    if (! onIsControlled && wasOnControlled) {
+    if (! isControlled && wasControlled) {
       console.error(
-        'In useToggle, a component is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+        `${ componentName }is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
     }
 
-    if (onIsControlled && ! wasOnControlled) {
+    if (isControlled && ! wasControlled) {
       console.error(
-        'In useToggle, a component is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+        `${ componentName } is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
     }
-  }, [onIsControlled, wasOnControlled])
+  }, [isControlled, wasControlled])
 }
 
 function useToggle({
@@ -63,9 +55,17 @@ function useToggle({
   const [state, dispatch] = React.useReducer(reducer, initialState)
   const onIsControlled = controlledOn != null
   const on = onIsControlled ? controlledOn : state.on
-  const hasOnChange = Boolean(onChange)
 
-  useControlledWarning({controlledOn, hasOnChange, onIsControlled, readOnly})
+  useControlledWarning(controlledOn, 'on', 'useToggle' )
+
+  React.useEffect( () => {
+    if (onIsControlled && onChange == null && !readOnly ) {
+      console.error(
+        `An on prop was passed to useToggle without an onChange prop. If you want it to be immutable, use initialOn. Otherwise, set either onChange or readOnly. Check the on prop.`
+      )
+    }
+
+  }, [onChange, onIsControlled, readOnly])
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
