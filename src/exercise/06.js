@@ -30,13 +30,13 @@ function useControlledWarning(controlPropValue, controlPropName, componentName) 
   const {current: wasControlled } = React.useRef(isControlled)
 
   React.useEffect( () => {
-    if (! isControlled && wasControlled && process.env.NODE_ENV !== 'production') {
+    if (! isControlled && wasControlled) {
       console.error(
         `${ componentName }is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
     }
 
-    if (isControlled && ! wasControlled && process.env.NODE_ENV !== 'production') {
+    if (isControlled && ! wasControlled) {
       console.error(
         `${ componentName } is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
@@ -56,7 +56,7 @@ function useOnChangeReadOnlyWarning(
 ) {
   React.useEffect( () => {
     const isControlled = controlPropValue != null
-    if (isControlled && ! hasOnChange && !readOnly && process.env.NODE_ENV !== 'production') {
+    if (isControlled && ! hasOnChange && !readOnly) {
       console.error(
         `A ${ controlPropName } prop was passed to ${ componentName } without an ${ onChangeProp } handler. This will result in a read-only ${ controlPropName } value. If you want it to be immutable, use ${ initialValueProp }. Otherwise, set either the ${ onChangeProp } or the ${ readOnlyProp }.`
       )
@@ -77,17 +77,21 @@ function useToggle({
   const onIsControlled = controlledOn != null
   const on = onIsControlled ? controlledOn : state.on
 
-  useControlledWarning(controlledOn, 'on', 'useToggle' )
-  useOnChangeReadOnlyWarning(
-    controlledOn,
-    'on',
-    'useToggle',
-    Boolean(onChange),
-    readOnly,
-    'readOnly',
-    'initialOn',
-    onChange,
-  )
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useControlledWarning(controlledOn, 'on', 'useToggle' )
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useOnChangeReadOnlyWarning(
+      controlledOn,
+      'on',
+      'useToggle',
+      Boolean(onChange),
+      readOnly,
+      'readOnly',
+      'initialOn',
+      onChange,
+    )
+  }
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
