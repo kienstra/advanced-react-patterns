@@ -54,6 +54,9 @@ function useToggle({initialOn = false, reducer = toggleReducer} = {}) {
   }
 }
 
+// export { useToggle, toggleReducer }
+
+// import { useToggle, toggleReducer }
 function App() {
   const [timesClicked, setTimesClicked] = React.useState(0)
   const clickedTooMuch = timesClicked >= 4
@@ -63,7 +66,7 @@ function App() {
   })
 
   function toggleStateReducer(state, action) {
-    if (action.type === 'toggle' && timesClicked >= 4 ) {
+    if (action.type === 'toggle' && clickedTooMuch) {
       return {on: state.on}
     }
 
