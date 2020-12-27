@@ -36,7 +36,6 @@ function useToggle({
   const [state, dispatch] = React.useReducer(reducer, initialState)
   const onIsControlled = controlledOn != null
   const on = onIsControlled ? controlledOn : state.on
-
   const hasOnChange = Boolean(onChange)
 
   React.useEffect( () => {
@@ -45,7 +44,22 @@ function useToggle({
         'An on prop was passed to useToggle without an onChange prop. If you want it to be immutable, use initialOn. Otherwise, set either onChange or readOnly'
       )
     }
-  }, [hasOnChange, onIsControlled, readOnly])
+
+  }, [controlledOn, hasOnChange, onIsControlled, readOnly])
+
+  React.useEffect( () => {
+    return () => {
+      if (onIsControlled) {
+        console.error(
+          'In useToggle, a component is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+        )
+      } else {
+        console.error(
+          'In useToggle, a component is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+        )
+      }
+    }
+  }, [onIsControlled])
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
