@@ -25,19 +25,7 @@ function toggleReducer(state, {type, initialState}) {
   }
 }
 
-function useToggle({
-  initialOn = false,
-  reducer = toggleReducer,
-  onChange,
-  on: controlledOn,
-  readOnly = false,
-} = {}) {
-  const {current: initialState} = React.useRef({on: initialOn})
-  const [state, dispatch] = React.useReducer(reducer, initialState)
-  const onIsControlled = controlledOn != null
-  const on = onIsControlled ? controlledOn : state.on
-  const hasOnChange = Boolean(onChange)
-
+function useControlledWarning({controlledOn, hasOnChange, onIsControlled, readOnly}) {
   React.useEffect( () => {
     if (onIsControlled && ! hasOnChange && !readOnly ) {
       console.error(
@@ -48,6 +36,7 @@ function useToggle({
   }, [controlledOn, hasOnChange, onIsControlled, readOnly])
 
   const {current: wasOnControlled } = React.useRef(onIsControlled)
+
   React.useEffect( () => {
     if (! onIsControlled && wasOnControlled) {
       console.error(
@@ -61,6 +50,22 @@ function useToggle({
       )
     }
   }, [onIsControlled, wasOnControlled])
+}
+
+function useToggle({
+  initialOn = false,
+  reducer = toggleReducer,
+  onChange,
+  on: controlledOn,
+  readOnly = false,
+} = {}) {
+  const {current: initialState} = React.useRef({on: initialOn})
+  const [state, dispatch] = React.useReducer(reducer, initialState)
+  const onIsControlled = controlledOn != null
+  const on = onIsControlled ? controlledOn : state.on
+  const hasOnChange = Boolean(onChange)
+
+  useControlledWarning({controlledOn, hasOnChange, onIsControlled, readOnly})
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
