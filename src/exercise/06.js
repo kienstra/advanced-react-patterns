@@ -2,7 +2,6 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import warning from 'warning'
 import {Switch} from '../switch'
 
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
@@ -75,13 +74,6 @@ function useToggle({
 function Toggle({on: controlledOn, onChange}) {
   const {on, getTogglerProps} = useToggle({on: controlledOn, onChange})
   const props = getTogglerProps({on})
-
-  const shouldWarn = props.on && ! props.onChange && ! props.readOnly
-  warning(
-    shouldWarn,
-    'Warning: Failed prop type: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.'
-  )
-
   return <Switch {...props} />
 }
 
