@@ -25,23 +25,44 @@ function toggleReducer(state, {type, initialState}) {
   }
 }
 
-function useControlledWarning(controlPropValue, controlPropName, componentName, {controlledOn, hasOnChange, readOnly}) {
+function useControlledWarning(controlPropValue, controlPropName, componentName) {
   const isControlled = controlPropValue != null
   const {current: wasControlled } = React.useRef(isControlled)
 
   React.useEffect( () => {
-    if (! isControlled && wasControlled) {
+    if (! isControlled && wasControlled && process.env.NODE_ENV !== 'production') {
       console.error(
         `${ componentName }is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
     }
 
-    if (isControlled && ! wasControlled) {
+    if (isControlled && ! wasControlled && process.env.NODE_ENV !== 'production') {
       console.error(
         `${ componentName } is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. Check the ${ controlPropName } prop.`
       )
     }
-  }, [isControlled, wasControlled])
+  }, [componentName, controlPropName, isControlled, wasControlled])
+}
+
+function useOnChangeReadOnlyWarning(
+  controlPropValue,
+  controlPropName,
+  componentName,
+  hasOnChange,
+  readOnly,
+  readOnlyProp,
+  initialValueProp,
+  onChangeProp,
+) {
+  React.useEffect( () => {
+    const isControlled = controlPropValue != null
+    if (isControlled && ! hasOnChange && !readOnly && process.env.NODE_ENV !== 'production') {
+      console.error(
+        `A ${ controlPropName } prop was passed to ${ componentName } without an ${ onChangeProp } handler. This will result in a read-only ${ controlPropName } value. If you want it to be immutable, use ${ initialValueProp }. Otherwise, set either the ${ onChangeProp } or the ${ readOnlyProp }.`
+      )
+    }
+
+  }, [readOnly, controlPropValue, onChangeProp, controlPropName, componentName, initialValueProp, readOnlyProp, hasOnChange])
 }
 
 function useToggle({
@@ -57,15 +78,16 @@ function useToggle({
   const on = onIsControlled ? controlledOn : state.on
 
   useControlledWarning(controlledOn, 'on', 'useToggle' )
-
-  React.useEffect( () => {
-    if (onIsControlled && onChange == null && !readOnly ) {
-      console.error(
-        `An on prop was passed to useToggle without an onChange prop. If you want it to be immutable, use initialOn. Otherwise, set either onChange or readOnly. Check the on prop.`
-      )
-    }
-
-  }, [onChange, onIsControlled, readOnly])
+  useOnChangeReadOnlyWarning(
+    controlledOn,
+    'on',
+    'useToggle',
+    Boolean(onChange),
+    readOnly,
+    'readOnly',
+    'initialOn',
+    onChange,
+  )
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
