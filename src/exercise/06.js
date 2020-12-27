@@ -47,19 +47,20 @@ function useToggle({
 
   }, [controlledOn, hasOnChange, onIsControlled, readOnly])
 
+  const {current: wasOnControlled } = React.useRef(onIsControlled)
   React.useEffect( () => {
-    return () => {
-      if (onIsControlled) {
-        console.error(
-          'In useToggle, a component is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
-        )
-      } else {
-        console.error(
-          'In useToggle, a component is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
-        )
-      }
+    if (! onIsControlled && wasOnControlled) {
+      console.error(
+        'In useToggle, a component is changing from controlled to uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+      )
     }
-  }, [onIsControlled])
+
+    if (onIsControlled && ! wasOnControlled) {
+      console.error(
+        'In useToggle, a component is changing from uncontrolled to controlled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component'
+      )
+    }
+  }, [onIsControlled, wasOnControlled])
 
   function dispatchWithOnChange(action) {
     if (!onIsControlled) {
