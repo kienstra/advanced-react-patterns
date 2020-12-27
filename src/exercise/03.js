@@ -5,6 +5,7 @@ import * as React from 'react'
 import {Switch} from '../switch'
 
 const ToggleContext = React.createContext()
+ToggleContext.displayName = 'ToggleContext'
 
 function Toggle({children}) {
   const [on, setOn] = React.useState(false)
@@ -20,7 +21,7 @@ function Toggle({children}) {
 function useToggle() {
   const context = React.useContext(ToggleContext)
   if (!context) {
-    throw new Error('useToggle must be called from withing <ToggleContext.Provider>')
+    throw new Error('useToggle must be called from withing <Toggle>')
   }
   return React.useContext(ToggleContext)
 }
